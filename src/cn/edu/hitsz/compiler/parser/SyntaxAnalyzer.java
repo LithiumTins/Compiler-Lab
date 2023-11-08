@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
-//TODO: 实验二: 实现 LR 语法分析驱动程序
-
 /**
  * LR 语法分析驱动程序
  * <br>
@@ -91,7 +89,6 @@ public class SyntaxAnalyzer {
     }
 
     public void run() {
-        // TODO: 实现驱动程序
         // 你需要根据上面的输入来实现 LR 语法分析的驱动程序
         // 请分别在遇到 Shift, Reduce, Accept 的时候调用上面的 callWhenInShift, callWhenInReduce, callWhenInAccept
         // 否则用于为实验二打分的产生式输出可能不会正常工作
@@ -131,17 +128,12 @@ public class SyntaxAnalyzer {
         while (true) {
             Status status = statusStack.peek();
             Symbol symbol = symbolStack.peek();
-            // if GOTO
-            if (symbol.isNonTerminal() && symbolStack.size() > statusStack.size()) {
-                statusStack.push(status.getGoto(symbol.nonTerminal));
-                continue;
-            }
             // Action
             Token token = tokens.getFirst();
             Action action = status.getAction(token);
             switch (action.getKind()) {
                 case Shift -> {
-                    callWhenInShift(status, token);
+                    callWhenInShift(action.getStatus(), token);
                     statusStack.push(action.getStatus());
                     symbolStack.push(new Symbol(tokens.removeFirst()));
                 }
@@ -153,6 +145,7 @@ public class SyntaxAnalyzer {
                         symbolStack.pop();
                     }
                     symbolStack.push(new Symbol(new NonTerminal(action.getProduction().head().getTermName())));
+                    statusStack.push(statusStack.peek().getGoto(symbolStack.peek().nonTerminal));
                 }
                 case Accept -> {
                     callWhenInAccept(status);
